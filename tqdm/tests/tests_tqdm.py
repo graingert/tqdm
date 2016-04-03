@@ -1039,13 +1039,19 @@ def test_main():
     from tqdm import main
     from docopt import DocoptExit
 
-    ls_out = subprocess.check_output(('ls'))
+    ls_out = subprocess.Popen(('ls'), stdout=subprocess.PIPE).communicate()[0]
     ls = subprocess.Popen(('ls'), stdout=subprocess.PIPE)
-    res = subprocess.check_output(('python', '-m', 'tqdm'),
-                                  stdin=ls.stdout,
-                                  stderr=subprocess.STDOUT)
+    res = subprocess.Popen(('python', '-m', 'tqdm'),
+                           stdout=subprocess.PIPE,
+                           stdin=ls.stdout,
+                           stderr=subprocess.STDOUT).communicate()[0]
     ls.wait()
+
+    # actual test:
+
     assert (ls_out in res)
+
+    # semi-fake test which gets coverage:
 
     # _sys = (sys.stdin, sys.argv)
     sys.stdin = map(str, _range(int(1e3)))
